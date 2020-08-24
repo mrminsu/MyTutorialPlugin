@@ -1,20 +1,21 @@
 package me.hyunseok;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class TestListener implements Listener {
+
+    static int count = 0;
 
     // static = 정적. (멈춰있는, 딱딱한, 고정)
     // 전역. (전체 통용 변수)
@@ -29,12 +30,14 @@ public class TestListener implements Listener {
     static int VALUE;
 
     final static HashMap<UUID, Player> PLAYERS = new HashMap<>();
+    final static List<Material> brokenBlocks = new ArrayList<>();
+    final static HashMap<Material, Integer> map = new HashMap<>();
     //플레이어 전체 목록. 이게 여러개일리가 없잖음. 단 1개.
 
     List<String> asf;
     // 배열. 목록.
 
-    HashMap<Integer, String> map;
+    HashMap<Integer, String> mapz;
     //키값 Integer를 넣으면 그에 대응하는 String 값을 출력함.
     //대표적인 해쉬맵구조: ItemStack의 인첸트 목록.
 
@@ -79,16 +82,52 @@ public class TestListener implements Listener {
         //문자열끼리 덧셈이 돼.
         // "sex" + "fuck"
         // -> sexfuck
-        player.kickPlayer("씨발련 잘왔다. 나가라. FUCK YOU "+ aClass.getByeonSu());
+        //player.kickPlayer("씨발련 잘왔다. 나가라. FUCK YOU "+ aClass.getByeonSu());
         // 씨발련 잘왔다. 나가라. FUCK YOU 5
+        player.sendMessage("오늘 서버에 들어온 사람은 " + count + "명 입니다.");
+        StringBuilder b = new StringBuilder();
+        for(Material mat : brokenBlocks){
+            b.append(mat.name() +",");
+        }
+        player.sendMessage("여지껏 깨진 블럭:" + b.toString());
+        count++;
     }
 
     @EventHandler
+    public void onBreak(BlockBreakEvent event){
+        brokenBlocks.add(event.getBlock().getType());
+        if(!map.containsKey(event.getBlock().getType())) {
+            map.put(event.getBlock().getType(), 0);
+        }
+        //null 그래서 초기화 작업임.
+
+        map.put(event.getBlock().getType() , map.get(event.getBlock().getType()) +1);
+        // 해당 블럭 타입을 집어넣고, 맵에 저장되있는 값을 불러온다음 +1.
+        event.getPlayer().sendMessage("이 블럭은 타입이"+ event.getBlock().getType() + "이며," +" 오늘 " + map.get(event.getBlock().getType()) +"번 깨졌습니다.");
+        //메세지 출력
+    }
+
+    @EventHandler
+    public void getInventoryClick(InventoryClickEvent event){
+        event.getCurrentItem().getItemMeta().setUnbreakable(true);
+    }
+
+    @EventHandler
+    public void onFlightAttempt(PlayerToggleFlightEvent event) {
+
+        if(event.isFlying() && event.getPlayer().getGameMode() != GameMode.CREATIVE) {
+
+            event.getPlayer().setVelocity(event.getPlayer().getVelocity().add(new org.bukkit.util.Vector(0.0,0.25,0.0)));
+
+            event.setCancelled(true);
+
+        }
+
+    }
+
+/*
     public void onAsdf(BlockBreakEvent event){
-       ItemStack a = new ItemStack(Material.DIAMOND);
-       Map<Enchantment, Integer> enchants = a.getEnchantments();
        //아이템 인첸트 맵을 가져옵니다.
-       int sharpnessLv = enchants.get(Enchantment.DAMAGE_ALL);
        //날카로움 레벨을 가져옵니다.
 
        if(true){
@@ -116,4 +155,6 @@ public class TestListener implements Listener {
         HashMap<UUID, Player> players;
         // UUID를 키로, 그에 맞는 Player 객체를 불러옴.
     }
+
+ */
 }
