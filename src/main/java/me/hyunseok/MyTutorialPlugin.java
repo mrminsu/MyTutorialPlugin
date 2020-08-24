@@ -16,6 +16,9 @@ public class MyTutorialPlugin extends JavaPlugin implements Listener {
         //플러그인 시작할때
         Bukkit.getLogger().info("니애미 씨발련아");
         Bukkit.getPluginManager().registerEvents(new TestListener(), this);
+        TestListener test = new TestListener();
+        test.publicValue = 5;
+        test.value = 4;
         //Bukkit.getPluginManager().registerEvents(this, this);
     }
 
